@@ -89,13 +89,27 @@
             margin: 5px 0;
         }
         
+        .clear-button {
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: #ccc;
+            color: black;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-left: 10px;
+        }
+        .clear-button:hover {
+            background-color: #bbb;
+        }
+        
     </style>
 </head>
 <body>
     <!-- ヘッダー部分 -->
     <header>
-        <form method="get">
+        <form method="get" id="searchForm">
             {{ form.as_p }}
+            
             <label for="sort">並び順:</label>
             <select name="sort" id="sort">
                 <option value="name" {% if request.GET.sort == "name" %}selected{% endif %}>名前順</option>
@@ -103,8 +117,17 @@
                 <option value="price_desc" {% if request.GET.sort == "price_desc" %}selected{% endif %}>価格の高い順</option>
                 <option value="created_at_desc" {% if request.GET.sort == "created_at_desc" %}selected{% endif %}>新しい順</option>
             </select>
+            
             <button type="submit">検索</button>
+            <button type="button" onclick="resetForm()">クリア</button>
         </form>
+        
+        <script>
+            function resetForm() {
+                window.location.href = window.location.pathname;  // 検索条件をリセット
+            }
+        </script>
+        
     </header>
 
     <!-- 検索結果 -->
