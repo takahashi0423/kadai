@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>{{ product.name }} - 商品詳細</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #f9f9f9;
+        text-align: center;
+      }
+      .product-detail {
+        max-width: 600px;
+        margin: 0 auto;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+      img {
+        max-width: 100%;
+        border-radius: 8px;
+      }
+      h1 {
+        color: #333;
+      }
+      p {
+        color: #666;
+      }
+      .back-button {
+        display: inline-block;
+        padding: 10px 15px;
+        background-color: #4caf50;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        margin-top: 20px;
+      }
+      .back-button:hover {
+        background-color: #45a049;
+      }
+      /* カートに入れるボタン */
+      .add-to-cart {
+        display: inline-block;
+        padding: 10px 15px;
+        background-color: #ff9800;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        margin-top: 20px;
+        cursor: pointer;
+        border: none;
+        font-size: 16px;
+      }
+      .add-to-cart:hover {
+        background-color: #e68900;
+      }
+      /* カートアイコン */
+      .cart-icon {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: #4caf50;
+        color: white;
+        padding: 15px;
+        border-radius: 50%;
+        text-align: center;
+        font-size: 24px;
+        cursor: pointer;
+      }
+      .cart-count {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background: red;
+        color: white;
+        font-size: 14px;
+        padding: 4px 8px;
+        border-radius: 50%;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 商品詳細 -->
+    <div class="product-detail">
+      {% if product.image %}
+      <img src="{{ product.image.url }}" alt="{{ product.name }}" />
+      {% else %}
+      <img src="/static/default_image.png" alt="デフォルト画像" />
+      {% endif %}
+      <h1>{{ product.name }}</h1>
+      <p>価格: ¥{{ product.price }}</p>
+      <p>カテゴリー: {{ product.category.name }}</p>
+      <p>{{ product.description }}</p>
+      <p>発売日: {{ product.release_date|default:"未設定" }}</p>
+
+      <!-- 🛒 カートに入れるボタン -->
+      <button class="add-to-cart" onclick="addToCart({{ product.id }})">🛒 カートに入れる</button>
+
+      <!-- 戻るボタン -->
+      <a href="{% url 'product_search' %}" class="back-button">戻る</a>
+    </div>
+
+    <!-- 🛒 カートアイコン（画面下固定） -->
+    <a href="{% url 'cart_view' %}" class="cart-icon">
+      🛒
+      <span id="cart-count" class="cart-count">0</span>
+    </a>
+
+    </button>
+
+    <script>
+      function addToCart(productId) {
+        fetch(`/add-to-cart/${productId}/`, { method: "GET" })
+          .then((response) => response.json())
+          .then((data) => {
+            document.getElementById("cart-count").innerText = data.cart_count;
+            alert("カートに追加しました！");
+          })
+          .catch((error) => console.error("エラー:", error));
+      }
+
+      function updateCartCount() {
+        fetch("/cart-count/")
+          .then((response) => response.json())
+          .then((data) => {
+            document.getElementById("cart-count").innerText = data.cart_count;
+          })
+          .catch((error) => console.error("エラー:", error));
+      }
+
+      updateCartCount();
+    </script>
+  </body>
+</html>

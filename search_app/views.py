@@ -1,6 +1,11 @@
-from django.shortcuts import render
-from .models import Product
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import Product, Cart
 from .forms import ProductSearchForm
+from django.http import JsonResponse
+
+def product_detail(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    return render(request, 'product_detail.html', {'product': product})
 
 def product_search(request):
     form = ProductSearchForm(request.GET or None)
@@ -9,6 +14,7 @@ def product_search(request):
     # 並び順の取得（デフォルトは名前順）
     sort = request.GET.get('sort', 'name')
 
+    # **🔹 並び順を適用**
     if sort == 'name':
         products = products.order_by('name')  # 名前順
     elif sort == 'price_asc':
@@ -20,6 +26,7 @@ def product_search(request):
     elif sort == 'release_date_asc':
         products = products.order_by('release_date')  # 発売日が古い順
 
+    # **🔹 検索条件の適用**
     if form.is_valid():
         query = form.cleaned_data.get('query')
         if query:
@@ -37,5 +44,32 @@ def product_search(request):
         if category:
             products = products.filter(category=category)
 
+    # **🔹 最後に `return render(...)` を実行**
     return render(request, 'product_search.html', {'form': form, 'products': products})
 
+def add_to_cart(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+
+    # すでにカートに入っている場合は数量を増やす
+    cart_item, created = Cart.objects.get_or_create(product=product)
+    if not created:
+        cart_item.quantity += 1
+    cart_item.save()
+
+    return JsonResponse({"message": "カートに追加しました", "cart_count": Cart.objects.count()})
+
+def cart_view(request):
+    cart_items = Cart.objects.all()
+    return render(request, 'cart.html', {'cart_items': cart_items})
+
+def remove_from_cart(request, product_id):
+    """🛒 カートから商品を削除"""
+    cart_item = get_object_or_404(Cart, product_id=product_id)
+    
+    if cart_item.quantity > 1:
+        cart_item.quantity -= 1  # 商品の数量を減らす
+        cart_item.save()
+    else:
+        cart_item.delete()  # 数量が1なら削除
+    
+    return JsonResponse({"message": "カートから削除しました", "cart_count": Cart.objects.count()})

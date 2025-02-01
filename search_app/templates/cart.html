@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>カート</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+      }
+      .cart-item {
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #ddd;
+        padding: 10px;
+      }
+      .cart-item img {
+        max-width: 100px;
+      }
+      .remove-button {
+        background-color: red;
+        color: white;
+        padding: 5px 10px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      .remove-button:hover {
+        background-color: darkred;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🛒 カートの中身</h1>
+    {% if cart_items %} {% for item in cart_items %}
+    <div class="cart-item">
+      <div>
+        {% if item.product.image %}
+        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" />
+        {% else %}
+        <img src="/static/default_image.png" alt="デフォルト画像" />
+        {% endif %}
+      </div>
+      <div>
+        <p>
+          {{ item.product.name }} - ¥{{ item.product.price }} x {{ item.quantity
+          }}個
+        </p>
+      </div>
+      <button
+        class="remove-button"
+        onclick="removeFromCart({{ item.product.id }})"
+      >
+        削除
+      </button>
+    </div>
+    {% endfor %} {% else %}
+    <p>カートに商品がありません。</p>
+    {% endif %}
+
+    <a href="{% url 'product_search' %}">← 買い物を続ける</a>
+
+    <script>
+      function removeFromCart(productId) {
+        fetch(`/remove-from-cart/${productId}/`, { method: "GET" })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.message) {
+              alert(data.message);
+              let cartItem = document.getElementById(`cart-item-${productId}`);
+              if (cartItem) {
+                cartItem.remove(); // 商品を非表示に
+              }
+              updateCartCount(); // カートの個数を更新
+            } else {
+              alert("削除に失敗しました");
+            }
+          })
+          .catch((error) => console.error("エラー:", error));
+      }
+
+      function updateCartCount() {
+        fetch("/cart-count/")
+          .then((response) => response.json())
+          .then((data) => {
+            document.getElementById("cart-count").innerText = data.cart_count;
+          })
+          .catch((error) => console.error("エラー:", error));
+      }
+
+      updateCartCount(); // ページ読み込み時にカートの個数を更新
+    </script>
+  </body>
+</html>

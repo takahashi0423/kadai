@@ -58,19 +58,27 @@
             padding: 20px;
         }
         
-        /* 各商品カード: 常に4列 */
+        /* 各商品カード: 4列レイアウト (レスポンシブ対応) */
         .product-card {
             background-color: white;
             border: 1px solid #ddd;
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            width: calc(25% - 20px); /* 幅を4列に分割 */
+            width: calc(25% - 20px); /* PCでは4列 */
             max-width: 300px;
             text-align: center;
             padding: 20px;
             box-sizing: border-box;
         }
-        
+
+        /* スマホ対応（2列表示） */
+        @media (max-width: 768px) {
+            .product-card {
+                width: calc(50% - 20px);
+            }
+        }
+
+        /* 商品画像 */
         .product-card img {
             max-width: 100%;
             height: auto;
@@ -89,6 +97,7 @@
             margin: 5px 0;
         }
         
+        /* クリアボタン */
         .clear-button {
             display: inline-block;
             padding: 10px 15px;
@@ -101,6 +110,41 @@
         .clear-button:hover {
             background-color: #bbb;
         }
+        .cart-container {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            text-align: center;
+            padding: 10px;
+            border-top: 2px solid #ddd;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    
+        .cart-icon {
+            position: relative;
+            background: #4CAF50;
+            color: white;
+            padding: 15px;
+            border-radius: 50%;
+            text-align: center;
+            font-size: 24px;
+            cursor: pointer;
+            display: inline-block;
+        }
+    
+        .cart-count {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: red;
+            color: white;
+            font-size: 14px;
+            padding: 4px 8px;
+            border-radius: 50%;
+        }
         
     </style>
 </head>
@@ -108,9 +152,19 @@
     <!-- ヘッダー部分 -->
     <header>
         <form method="get" id="searchForm">
-            {{ form.as_p }}
+            <input type="text" name="query" placeholder="商品名を入力" value="{{ request.GET.query }}">
+            <input type="number" name="min_price" placeholder="最低価格" value="{{ request.GET.min_price }}">
+            <input type="number" name="max_price" placeholder="最高価格" value="{{ request.GET.max_price }}">
             
-            <label for="sort">並び順:</label>
+            <select name="category">
+                <option value="">すべてのカテゴリー</option>
+                {% for category in form.fields.category.queryset %}
+                <option value="{{ category.id }}" {% if request.GET.category == category.id|stringformat:"s" %}selected{% endif %}>
+                    {{ category.name }}
+                </option>
+                {% endfor %}
+            </select>
+            
             <select name="sort" id="sort">
                 <option value="name" {% if request.GET.sort == "name" %}selected{% endif %}>名前順</option>
                 <option value="price_asc" {% if request.GET.sort == "price_asc" %}selected{% endif %}>価格の安い順</option>
@@ -118,17 +172,16 @@
                 <option value="release_date_desc" {% if request.GET.sort == "release_date_desc" %}selected{% endif %}>発売日が新しい順</option>
                 <option value="release_date_asc" {% if request.GET.sort == "release_date_asc" %}selected{% endif %}>発売日が古い順</option>
             </select>
-            
+
             <button type="submit">検索</button>
-            <button type="button" onclick="resetForm()">クリア</button>
+            <button type="button" class="clear-button" onclick="resetForm()">クリア</button>
         </form>
-        
+
         <script>
             function resetForm() {
                 window.location.href = window.location.pathname;  // 検索条件をリセット
             }
         </script>
-        
     </header>
 
     <!-- 検索結果 -->
@@ -136,14 +189,16 @@
         <div class="results">
             {% for product in products %}
             <div class="product-card">
-                {% if product.image %}
-                <img src="{{ product.image.url }}" alt="{{ product.name }}">
-                {% else %}
-                <img src="/static/default_image.png" alt="デフォルト画像">
-                {% endif %}
-                <h3>{{ product.name }}</h3>
-                <p>¥{{ product.price }}</p>
-                <p>{{ product.category.name }}</p>
+                <a href="{% url 'product_detail' product.id %}" style="text-decoration: none; color: inherit;">
+                    {% if product.image %}
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                    {% else %}
+                    <img src="/static/default_image.png" alt="デフォルト画像">
+                    {% endif %}
+                    <h3>{{ product.name }}</h3>
+                    <p>¥{{ product.price }}</p>
+                    <p>{{ product.category.name }}</p>
+                </a>
             </div>
             {% empty %}
             <p>該当する商品が見つかりませんでした。</p>

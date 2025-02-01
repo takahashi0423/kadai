@@ -1,0 +1,46 @@
+<style>
+  /* 🛒 カートアイコンの固定位置 */
+  .cart-container {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.9);
+    text-align: center;
+    padding: 10px;
+    border-top: 2px solid #ddd;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .cart-icon {
+    position: relative;
+    background: #4caf50;
+    color: white;
+    padding: 15px;
+    border-radius: 50%;
+    text-align: center;
+    font-size: 24px;
+    cursor: pointer;
+    display: inline-block;
+  }
+
+  .cart-count {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: red;
+    color: white;
+    font-size: 14px;
+    padding: 4px 8px;
+    border-radius: 50%;
+  }
+</style>
+
+<!-- 🛒 カートアイコン -->
+<div class="cart-container">
+  <a href="{% url 'cart_view' %}" class="cart-icon">
+    🛒
+    <span id="cart-count" class="cart-count">0</span>
+  </a>
+</div>
