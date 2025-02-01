@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>商品検索</title>
+    <style>
+        /* 全体のスタイル */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        /* ヘッダー部分 */
+        header {
+            background-color: #4CAF50;
+            padding: 20px;
+            color: white;
+        }
+        
+        header form {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        header input, header select, header button {
+            flex: 1;
+            min-width: 120px;
+            padding: 10px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+        }
+        
+        header button {
+            background-color: #ffffff;
+            color: #4CAF50;
+            cursor: pointer;
+        }
+        
+        header button:hover {
+            background-color: #45a049;
+            color: white;
+        }
+        
+        /* 検索結果のコンテナ */
+        .results {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: space-between; /* 4列を均等に配置 */
+            padding: 20px;
+        }
+        
+        /* 各商品カード: 常に4列 */
+        .product-card {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: calc(25% - 20px); /* 幅を4列に分割 */
+            max-width: 300px;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        
+        .product-card img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .product-card h3 {
+            margin: 10px 0;
+            font-size: 1.2rem;
+            color: #333;
+        }
+        
+        .product-card p {
+            color: #666;
+            margin: 5px 0;
+        }
+        
+    </style>
+</head>
+<body>
+    <!-- ヘッダー部分 -->
+    <header>
+        <form method="get">
+            {{ form.as_p }}
+            <label for="sort">並び順:</label>
+            <select name="sort" id="sort">
+                <option value="name" {% if request.GET.sort == "name" %}selected{% endif %}>名前順</option>
+                <option value="price_asc" {% if request.GET.sort == "price_asc" %}selected{% endif %}>価格の安い順</option>
+                <option value="price_desc" {% if request.GET.sort == "price_desc" %}selected{% endif %}>価格の高い順</option>
+                <option value="created_at_desc" {% if request.GET.sort == "created_at_desc" %}selected{% endif %}>新しい順</option>
+            </select>
+            <button type="submit">検索</button>
+        </form>
+    </header>
+
+    <!-- 検索結果 -->
+    <main>
+        <div class="results">
+            {% for product in products %}
+            <div class="product-card">
+                {% if product.image %}
+                <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                {% else %}
+                <img src="/static/default_image.png" alt="デフォルト画像">
+                {% endif %}
+                <h3>{{ product.name }}</h3>
+                <p>¥{{ product.price }}</p>
+                <p>{{ product.category.name }}</p>
+            </div>
+            {% empty %}
+            <p>該当する商品が見つかりませんでした。</p>
+            {% endfor %}
+        </div>
+    </main>
+</body>
+</html>
