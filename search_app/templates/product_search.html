@@ -115,7 +115,8 @@
                 <option value="name" {% if request.GET.sort == "name" %}selected{% endif %}>名前順</option>
                 <option value="price_asc" {% if request.GET.sort == "price_asc" %}selected{% endif %}>価格の安い順</option>
                 <option value="price_desc" {% if request.GET.sort == "price_desc" %}selected{% endif %}>価格の高い順</option>
-                <option value="created_at_desc" {% if request.GET.sort == "created_at_desc" %}selected{% endif %}>新しい順</option>
+                <option value="release_date_desc" {% if request.GET.sort == "release_date_desc" %}selected{% endif %}>発売日が新しい順</option>
+                <option value="release_date_asc" {% if request.GET.sort == "release_date_asc" %}selected{% endif %}>発売日が古い順</option>
             </select>
             
             <button type="submit">検索</button>

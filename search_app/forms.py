@@ -28,3 +28,8 @@ class ProductSearchForm(forms.Form):
         label='カテゴリー',
         empty_label='すべて'
     )
+    release_date = forms.DateField(
+        required=False,
+        label='発売日',
+        widget=forms.DateInput(attrs={'type': 'date'})  # 🔹 カレンダー選択
+    )

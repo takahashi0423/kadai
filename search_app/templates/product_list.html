@@ -1,26 +1,18 @@
-<!DOCTYPE html>
-<html lang="ja">
-  <head>
-    <meta charset="UTF-8" />
-    <title>商品検索</title>
-  </head>
-  <body>
-    <h1>商品検索</h1>
-    <form method="get">
-      {{ form.as_p }}
-      <!-- フォーム全体を表示 -->
-      <button type="submit">検索</button>
-    </form>
-
-    <h2>検索結果</h2>
-    <ul>
-      {% for product in products %}
-      <li>
-        {{ product.name }} - ¥{{ product.price }} - {{ product.category.name }}
-      </li>
-      {% empty %}
-      <li>該当する商品が見つかりませんでした。</li>
-      {% endfor %}
-    </ul>
-  </body>
-</html>
+<div class="results">
+  {% for product in products %}
+  <div class="product-card">
+    {% if product.image %}
+    <img src="{{ product.image.url }}" alt="{{ product.name }}" />
+    {% else %}
+    <img src="/static/default_image.png" alt="デフォルト画像" />
+    {% endif %}
+    <h3>{{ product.name }}</h3>
+    <p>¥{{ product.price }}</p>
+    <p>カテゴリー: {{ product.category.name }}</p>
+    <p>発売日: {{ product.release_date|default:"未設定" }}</p>
+    <!-- 🔹 発売日を表示 -->
+  </div>
+  {% empty %}
+  <p>該当する商品が見つかりませんでした。</p>
+  {% endfor %}
+</div>
