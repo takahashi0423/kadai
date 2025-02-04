@@ -1,5 +1,5 @@
 from django import forms
-from .models import Category
+from .models import Category, Review
 
 class ProductSearchForm(forms.Form):
     query = forms.CharField(
@@ -23,7 +23,7 @@ class ProductSearchForm(forms.Form):
         widget=forms.NumberInput(attrs={'placeholder': '最高価格を入力'})
     )
     category = forms.ModelChoiceField(
-        queryset=Category.objects.all(),
+        queryset=Category.objects.none(),  # 🔹 初期状態では空
         required=False,
         label='カテゴリー',
         empty_label='すべて'
@@ -33,3 +33,17 @@ class ProductSearchForm(forms.Form):
         label='発売日',
         widget=forms.DateInput(attrs={'type': 'date'})  # 🔹 カレンダー選択
     )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['category'].queryset = Category.objects.all()  # 🔹 フォーム初期化時に `queryset` をセット
+
+
+class ReviewForm(forms.ModelForm):
+    class Meta:
+        model = Review
+        fields = ['rating', 'comment']
+        widgets = {
+            'rating': forms.Select(choices=[(i, f"{i} ⭐") for i in range(1, 6)]),
+            'comment': forms.Textarea(attrs={'rows': 3}),
+        }

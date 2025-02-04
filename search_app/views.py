@@ -1,11 +1,31 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Product, Cart
-from .forms import ProductSearchForm
+from .models import Product, Cart, Review
+from .forms import ProductSearchForm, ReviewForm
 from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
 
 def product_detail(request, pk):
     product = get_object_or_404(Product, pk=pk)
-    return render(request, 'product_detail.html', {'product': product})
+    reviews = product.reviews.all()  # 商品のレビューを取得
+    avg_rating = product.average_rating()  # 平均評価を取得
+
+    if request.method == "POST":
+        form = ReviewForm(request.POST)
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.product = product
+            review.user = request.user
+            review.save()
+            return redirect('product_detail', pk=product.pk)
+    else:
+        form = ReviewForm()
+
+    return render(request, 'product_detail.html', {
+        'product': product,
+        'reviews': reviews,
+        'avg_rating': avg_rating,
+        'form': form,
+    })
 
 def product_search(request):
     form = ProductSearchForm(request.GET or None)
@@ -44,7 +64,6 @@ def product_search(request):
         if category:
             products = products.filter(category=category)
 
-    # **🔹 最後に `return render(...)` を実行**
     return render(request, 'product_search.html', {'form': form, 'products': products})
 
 def add_to_cart(request, product_id):

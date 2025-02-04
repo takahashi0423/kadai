@@ -80,6 +80,26 @@
         padding: 4px 8px;
         border-radius: 50%;
       }
+      /* レビュー部分のスタイル */
+      .review-section {
+        margin-top: 30px;
+        text-align: left;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+      .review {
+        background: #fff;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+      .review p {
+        margin: 5px 0;
+      }
+      .stars {
+        color: #ffd700;
+      }
     </style>
   </head>
   <body>
@@ -96,11 +116,58 @@
       <p>{{ product.description }}</p>
       <p>発売日: {{ product.release_date|default:"未設定" }}</p>
 
+      <!-- ⭐ 平均評価 -->
+      <p>
+        <p>平均評価:
+          <span class="stars">
+            {% for i in "12345"|make_list %}
+              {% if forloop.counter <= avg_rating|default:0 %}
+                ★
+              {% else %}
+                ☆
+              {% endif %}
+            {% endfor %}
+          </span>
+          ({{ avg_rating|floatformat:1 }} / 5)
+        </p>
+
       <!-- 🛒 カートに入れるボタン -->
-      <button class="add-to-cart" onclick="addToCart({{ product.id }})">🛒 カートに入れる</button>
+      <button class="add-to-cart" onclick="addToCart({{ product.id }})">
+        🛒 カートに入れる
+      </button>
 
       <!-- 戻るボタン -->
       <a href="{% url 'product_search' %}" class="back-button">戻る</a>
+    </div>
+
+    <!-- 📝 レビュー投稿 -->
+    <div class="review-section">
+      <h2>レビューを投稿</h2>
+      {% if user.is_authenticated %}
+      <form method="post">
+        {% csrf_token %} {{ form.as_p }}
+        <button type="submit">投稿</button>
+      </form>
+      {% else %}
+      <p>
+        レビューを投稿するには
+        <a href="{% url 'login' %}">ログイン</a> してください。
+      </p>
+      {% endif %}
+
+      <!-- 📃 レビュー一覧 -->
+      <h2>レビュー</h2>
+      {% if reviews %}
+        {% for review in reviews %}
+          <div class="review">
+            <p><strong>{{ review.user.username }}</strong> - {{ review.rating }} ★</p>
+            <p>{{ review.comment }}</p>
+            <small>{{ review.created_at }}</small>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p>まだレビューがありません。</p>
+      {% endif %}
     </div>
 
     <!-- 🛒 カートアイコン（画面下固定） -->
@@ -108,8 +175,6 @@
       🛒
       <span id="cart-count" class="cart-count">0</span>
     </a>
-
-    </button>
 
     <script>
       function addToCart(productId) {
