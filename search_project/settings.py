@@ -135,5 +135,3 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # 静的ファイルの配置元
 STATICFILES_DIRS = [BASE_DIR / 'static']  # 存在するディレクトリを指定
-
-
